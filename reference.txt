@@ -1,0 +1,15 @@
+// data.JobModel.create({
+  //   jobId : 1,
+  // googleJobId : 'abcd1234',
+  // status : true
+  // });
+  
+  // data.CompanyModel.create({
+  //   employerId : 3,
+  //   googleCompanyId: 'company1234',
+  //   status : false
+  // }).then((data)=>{
+  //   console.log('company is created',JSON.stringify(data));
+  // }).catch((err)=>{
+  //   console.log(err);
+  // });

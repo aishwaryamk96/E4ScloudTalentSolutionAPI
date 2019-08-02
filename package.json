@@ -5,12 +5,19 @@
   "main": "index.js",
   "dependencies": {
     "assert": "^2.0.0",
+    "dotenv": "^8.0.0",
+    "googleapis": "^41.0.1",
+    "init": "^0.1.2",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.26",
     "mysql2": "^1.6.5",
-    "sequelize": "^5.10.1"
+    "sequelize": "^5.10.1",
+    "sequelize-cli": "^5.5.0"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
