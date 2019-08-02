@@ -20,16 +20,16 @@ const updateQueueStatus = (queueId, status) => {
     });
 };
 const removeQueue = (queueId) => {
-    // data.dbCon.query('DELETE from queue where queueId = :queueId', {
-    //     replacements: {
-    //         queueId: queueId
-    //     },
-    //     type: Sequelize.QueryTypes.DELETE
-    // }).then(data => {
-    //     console.log(queueId + 'execution completed');
-    // }).catch(err => {
-    //     console.error('error while deleting row from queue');
-    // });
+    data.dbCon.query('DELETE from queue where queueId = :queueId', {
+        replacements: {
+            queueId: queueId
+        },
+        type: Sequelize.QueryTypes.DELETE
+    }).then(data => {
+        console.log(queueId + 'execution completed');
+    }).catch(err => {
+        console.error('error while deleting row from queue');
+    });
 };
 const getCompany = (employerId) => {
     return new Promise((resolve, reject) => {
