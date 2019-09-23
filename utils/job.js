@@ -46,11 +46,9 @@ const generateJob = (jobObj, companyName, jobName) => {
 const createJob = async(jobServiceClient, jobData, jobId, queueId) => {
     try {
         const jobObj = JSON.parse(jobData);
-        console.log(jobObj);
         const company = await dbQueries.getCompany(jobObj.employerId);
         const companyName = company.googleCompanyId;
         const jobToBeCreated = generateJob(jobObj, companyName);
-        console.log(jobToBeCreated);
         const request = {
             parent: `projects/${process.env.googleProjectName}`,
             resource: {
@@ -72,6 +70,8 @@ const updateJob = async(jobServiceClient, jobData, jobId, queueId) => {
     try {
         const jobObj = JSON.parse(jobData);
         const job = await dbQueries.getJob(jobId);
+        if(!job)
+            return jobUtils.createJob(jobServiceClient, jobData, jobId, queueId);
         const jobName = job.googleJobId;
         const company = await dbQueries.getCompany(jobObj.employerId);
         const companyName = company.googleCompanyId;

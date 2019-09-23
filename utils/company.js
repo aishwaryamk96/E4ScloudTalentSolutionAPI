@@ -74,6 +74,8 @@ const createCompany = async(jobServiceClient, companyData, employerId, queueId) 
 const updateCompany = async(jobServiceClient, companyData, employerId, queueId) => {
     try {
         const company = await dbQueries.getCompany(employerId);
+        if(!company)
+            return companyUtils.createCompany(jobServiceClient, companyData, employerId, queueId);   
         const companyName = company.googleCompanyId;
         const companyToBeUpdated = generateCompany(companyData, companyName);
         const request = {
@@ -82,6 +84,7 @@ const updateCompany = async(jobServiceClient, companyData, employerId, queueId) 
                 company: companyToBeUpdated
             }
         };
+        console.log(companyToBeUpdated);
         const companyUpdated = await jobServiceClient.projects.companies.patch(request);
         console.log(`Company updated: ${JSON.stringify(companyUpdated.data)}`);
         dbQueries.removeQueue(queueId);
