@@ -10,7 +10,7 @@ const CompanyFactory = require('../Factory/Companies');
 const dbCon = new Sequelize(process.env.DBNAME, process.env.DBUSERNAME, process.env.DBPASSWORD, {
     host: process.env.DBHOST,
     dialect: 'mysql',
-    port: process.env.DB,
+    port: process.env.DBPORT,
     pool: {
         max: 5,
         min: 0,
@@ -21,7 +21,7 @@ const dbCon = new Sequelize(process.env.DBNAME, process.env.DBUSERNAME, process.
     },
     timezone: '+00:00'
 });
-
+//console.log(dbCon);
 const QueueModel = QueueFactory(dbCon, Sequelize);
 const JobModel = JobFactory(dbCon, Sequelize);
 const CompanyModel = CompanyFactory(dbCon, Sequelize);
