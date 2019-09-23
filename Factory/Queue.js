@@ -3,7 +3,7 @@
 // const Sequelize = require('sequelize');
 
 module.exports = function(dbCon, Sequelize) {
-    return dbCon.define('Queue', {
+    return dbCon.define('queue', {
         queueId: {
             type: Sequelize.INTEGER,
             primaryKey: true,
