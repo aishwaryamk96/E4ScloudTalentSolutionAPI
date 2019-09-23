@@ -2,26 +2,29 @@ const { google } = require('googleapis');
 
 const createAuthCredential = () => {
     return new Promise((resolve, reject) => {
-        google.auth.getApplicationDefault((err, authClient) => {
+        const scope = ['https://www.googleapis.com/auth/jobs'];
+        credentials =  JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIAL);
+        const jwtClient = new google.auth.JWT(
+            credentials.client_email,
+            null,
+            credentials.private_key,
+            scope,
+            null
+        );
+        jwtClient.authorize(function (err, tokens) {
             if (err) {
-                console.error('Failed to acquire credentials');
+                console.log(err);
                 reject(err);
+                return;
             }
-            if (authClient.createScopedRequired) {
-                authClient = authClient.createScoped([
-                    'https://www.googleapis.com/auth/jobs',
-                ]);
-            }
-            // Instantiates an authorized client
             resolve(google.jobs({
                 version: 'v3',
-                auth: authClient
+                auth:jwtClient,
+                
             }));
+            });
+
         });
 
-    });
-
-};
-
-
-module.exports = createAuthCredential;
+    };
+    module.exports = createAuthCredential;
