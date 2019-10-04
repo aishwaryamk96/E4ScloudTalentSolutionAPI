@@ -31,8 +31,8 @@ const listCompanies = async(jobServiceClient) => {
 /**
  * generat an comapny
  */
-const generateCompany = (companyData, companyName) => {
-    const companyObj = JSON.parse(companyData);
+const generateCompany = (companyObj, companyName) => {
+    ///const companyObj = JSON.parse(companyData);
     const company = {
         displayName: companyObj.displayName,
         externalId: companyObj.externalId.toString(),
@@ -48,8 +48,8 @@ const generateCompany = (companyData, companyName) => {
     return company;
 };
 
-const createCompany = async(jobServiceClient, companyData, employerId, queueId) => {
-    try {
+const createCompany = (jobServiceClient, companyData, employerId, queueId) => {
+    return new Promise((resolve, reject) => {
         const companyToBeCreated = generateCompany(companyData);
         const request = {
             parent: `projects/${process.env.googleProjectName}`,
@@ -57,59 +57,66 @@ const createCompany = async(jobServiceClient, companyData, employerId, queueId) 
                 company: companyToBeCreated
             }
         };
-        const companyCreated = await jobServiceClient.projects.companies.create(request);
-        console.log(`Company created: ${JSON.stringify(companyCreated.data)}`);
-        dbQueries.removeQueue(queueId);
-        dbQueries.createCompany(employerId, companyCreated.data.name);
-    } catch (err) {
-        console.error(err);
-        dbQueries.updateQueueStatus(queueId, constants.ISSUE);
-    }
+        jobServiceClient.projects.companies.create(request).then((companyCreated) => {
+            dbQueries.removeQueue(queueId);
+            dbQueries.createCompany(employerId, companyCreated.data.name);
+            resolve(companyCreated);
+        }).catch((error) => {
+            dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+            reject(error);
+        });
+    });
 };
 
 
 /**
  * update an company
  */
-const updateCompany = async(jobServiceClient, companyData, employerId, queueId) => {
-    try {
-        const company = await dbQueries.getCompany(employerId);
-        if(!company)
-            return companyUtils.createCompany(jobServiceClient, companyData, employerId, queueId);   
-        const companyName = company.googleCompanyId;
-        const companyToBeUpdated = generateCompany(companyData, companyName);
-        const request = {
-            name: companyName,
-            resource: {
-                company: companyToBeUpdated
-            }
-        };
-        console.log(companyToBeUpdated);
-        const companyUpdated = await jobServiceClient.projects.companies.patch(request);
-        console.log(`Company updated: ${JSON.stringify(companyUpdated.data)}`);
-        dbQueries.removeQueue(queueId);
-        dbQueries.updateCompany(employerId, companyUpdated.data.name, constants.ACTIVE);
-    } catch (err) {
-        console.error(err);
-        dbQueries.updateQueueStatus(queueId, constants.ISSUE);
-    }
+const updateCompany = (jobServiceClient, companyData, employerId, queueId) => {
+    return new Promise((resolve, reject) => {
+        dbQueries.getCompany(employerId).then(company => {
+            if (!company)
+                return createCompany(jobServiceClient, companyData, employerId, queueId);
+            const companyName = company.googleCompanyId;
+            const companyToBeUpdated = generateCompany(companyData, companyName);
+            const request = {
+                name: companyName,
+                resource: {
+                    company: companyToBeUpdated
+                }
+            };
+            jobServiceClient.projects.companies.patch(request).then((companyUpdated) => {
+                dbQueries.removeQueue(queueId);
+                dbQueries.updateCompany(employerId, companyUpdated.data.name, constants.ACTIVE);
+                resolve(companyUpdated);
+            }).catch((error) => {
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                reject(error);
+            });
+        });
+    });
 };
 
-const deleteCompany = async(jobServiceClient, employerId, queueId) => {
-    try {
-        const company = await dbQueries.getCompany(employerId);
-        const companyName = company.googleCompanyId;
-        const request = {
-            name: companyName,
-        };
-        jobServiceClient.projects.companies.delete(request);
-        console.log(`Company deleted`);
-        dbQueries.updateCompany(employerId, '', constants.INACTIVE);
-        dbQueries.removeQueue(queueId);
-    } catch (err) {
-        console.error(err);
-        dbQueries.updateQueueStatus(queueId, constants.ISSUE);
-    }
+const deleteCompany = (jobServiceClient, employerId, queueId) => {
+    return new Promise((resolve, reject) => {
+        dbQueries.getCompany(employerId).then(company => {
+            if (!company)
+                reject("google company Id is not there");
+            const companyName = company.googleCompanyId;
+            const request = {
+                name: companyName,
+            };
+            jobServiceClient.projects.companies.delete(request).then((companyDeleted) => {
+                dbQueries.removeQueue(queueId);
+                dbQueries.updateCompany(employerId, '', constants.INACTIVE);
+                resolve("company deleted");
+            }).catch((error) => {
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                reject(error);
+            });
+        });
+
+    });
 };
 module.exports = {
     listCompanies,

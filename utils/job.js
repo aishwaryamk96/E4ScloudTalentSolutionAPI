@@ -43,71 +43,81 @@ const generateJob = (jobObj, companyName, jobName) => {
     }
 };
 
-const createJob = async(jobServiceClient, jobData, jobId, queueId) => {
-    try {
+const createJob = (jobServiceClient, jobData, jobId, queueId) => {
+    return new Promise((resolve, reject) => {
         const jobObj = JSON.parse(jobData);
-        const company = await dbQueries.getCompany(jobObj.employerId);
-        const companyName = company.googleCompanyId;
-        const jobToBeCreated = generateJob(jobObj, companyName);
-        const request = {
-            parent: `projects/${process.env.googleProjectName}`,
-            resource: {
-                job: jobToBeCreated,
-            },
-        };
-        const jobCreated = await jobServiceClient.projects.jobs.create(request);
-        console.log(`Job created: ${JSON.stringify(jobCreated.data)}`);
-        dbQueries.removeQueue(queueId);
-        dbQueries.createJob(jobId, jobCreated.data.name, constants.ACTIVE);
-    } catch (error) {
-        console.error(error);
-        console.error(`Got exception while creating job!`);
-        dbQueries.updateQueueStatus(queueId, constants.ISSUE);
-    }
+        dbQueries.getCompany(jobObj.employerId).then(company => {
+            const companyName = company.googleCompanyId;
+            const jobToBeCreated = generateJob(jobObj, companyName);
+            const request = {
+                parent: `projects/${process.env.googleProjectName}`,
+                resource: {
+                    job: jobToBeCreated,
+                },
+            };
+            jobServiceClient.projects.jobs.create(request).then((jobCreated) => {
+                dbQueries.removeQueue(queueId);
+                dbQueries.createJob(jobId, jobCreated.data.name, constants.ACTIVE);
+                resolve(jobCreated);
+            }).catch((error) => {
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                reject(error);
+            });
+        }).catch((error) => {
+            reject(error);
+        })
+    });
 };
 
-const updateJob = async(jobServiceClient, jobData, jobId, queueId) => {
-    try {
+const updateJob = (jobServiceClient, jobData, jobId, queueId) => {
+    return new Promise((resolve, reject) => {
         const jobObj = JSON.parse(jobData);
-        const job = await dbQueries.getJob(jobId);
-        if(!job)
-            return jobUtils.createJob(jobServiceClient, jobData, jobId, queueId);
-        const jobName = job.googleJobId;
-        const company = await dbQueries.getCompany(jobObj.employerId);
-        const companyName = company.googleCompanyId;
-        const jobToBeUpdated = generateJob(jobObj, companyName, jobName);
-        const request = {
-            name: jobName,
-            resource: {
-                job: jobToBeUpdated,
-            },
-        };
-        const jobUpdated = await jobServiceClient.projects.jobs.patch(request);
-        console.log(`Job updated: ${JSON.stringify(jobUpdated.data)}`);
-        dbQueries.updateJob(jobId, jobUpdated.data.name, constants.ACTIVE);
-        dbQueries.removeQueue(queueId);
-    } catch (e) {
-        console.error(e);
-        console.error(`Got exception while updating job!`);
-        dbQueries.updateQueueStatus(queueId, constants.ISSUE);
-    }
+        dbQueries.getJob(jobId).then(job => {
+            if (!job) {
+                createJob(jobServiceClient, jobData, jobId, queueId);
+                return resolve("job needs to create");
+            }
+            const jobName = job.googleJobId;
+            dbQueries.getCompany(jobObj.employerId).then(company => {
+                const companyName = company.googleCompanyId;
+                const jobToBeUpdated = generateJob(jobObj, companyName, jobName);
+                const request = {
+                    name: jobName,
+                    resource: {
+                        job: jobToBeUpdated,
+                    },
+                };
+                jobServiceClient.projects.jobs.patch(request).then((jobUpdated) => {
+                    dbQueries.removeQueue(queueId);
+                    dbQueries.updateJob(jobId, jobUpdated.data.name, constants.ACTIVE);
+                    resolve(jobUpdated);
+                }).catch((error) => {
+                    dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                    reject(error);
+                });
+            });
+        });
+    });
 };
-const deleteJob = async(jobServiceClient, jobId, queueId) => {
-    try {
-        const job = await dbQueries.getJob(jobId);
-        const jobName = job.googleJobId;
-        const request = {
-            name: jobName,
-        };
-        await jobServiceClient.projects.jobs.delete(request);
-        console.log('Job deleted');
-        dbQueries.updateJob(jobId, '', constants.INACTIVE);
-        dbQueries.removeQueue(queueId);
-    } catch (e) {
-        console.error(e);
-        console.error('Got exception while deleting job');
-        dbQueries.updateQueueStatus(queueId, constants.ISSUE);
-    }
+const deleteJob = (jobServiceClient, jobId, queueId) => {
+    return new Promise((resolve, reject) => {
+        dbQueries.getJob(jobId).then(job => {
+            if (!job)
+                reject("google job Id is not there to delete the job");
+            const jobName = job.googleJobId;
+            const request = {
+                name: jobName,
+            };
+            jobServiceClient.projects.jobs.delete(request).then((jobDeleted) => {
+                dbQueries.removeQueue(queueId);
+                dbQueries.updateJob(jobId, '', constants.INACTIVE);
+                resolve("job deleted");
+            }).catch((error) => {
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                reject(error);
+            });
+        });
+    });
 };
 
 module.exports = {
