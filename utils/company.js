@@ -31,8 +31,8 @@ const listCompanies = async(jobServiceClient) => {
 /**
  * generat an comapny
  */
-const generateCompany = (companyObj, companyName) => {
-    ///const companyObj = JSON.parse(companyData);
+const generateCompany = (companyData, companyName) => {
+    const companyObj = JSON.parse(companyData);
     const company = {
         displayName: companyObj.displayName,
         externalId: companyObj.externalId.toString(),
