@@ -20,21 +20,27 @@ const generateJob = (jobObj, companyName, jobName) => {
             jobEndTime: jobObj.jobEndTime,
             // postingPublishTime: jobObj.postingPublishTime,
             postingRegion: jobObj.postingRegion,
-            customAttributes: {
-                boResidential: { stringValues: jobObj.customAttributes.boResidential, filterable: true },
-                IndoorOutdoor: { stringValues: jobObj.customAttributes.IndoorOutdoor, filterable: true },
-                FullorParttime: { stringValues: jobObj.customAttributes.FullorParttime, filterable: true },
-                jobCompanyName: { stringValues: jobObj.customAttributes.jobCompanyName, filterable: true },
-                jobBand: { longValues: jobObj.customAttributes.jobBand, filterable: true },
-                jobRank: { longValues: jobObj.customAttributes.jobRank, filterable: true },
-                WTdaytime: { stringValues: jobObj.customAttributes.WTdaytime, filterable: true },
-                WTevening: { stringValues: jobObj.customAttributes.WTevening, filterable: true },
-                WTweekend: { stringValues: jobObj.customAttributes.WTweekend, filterable: true },
-                jobSector: { stringValues: jobObj.customAttributes.jobSector, filterable: true },
-                jobType: { stringValues: jobObj.customAttributes.jobType, filterable: true },
-            },
             processingOptions: { disableStreetAddressResolution: true }
         };
+        const customAttributes = {
+            boResidential : { stringValues: jobObj.customAttributes.boResidential, filterable: true },
+            IndoorOutdoor : { stringValues: jobObj.customAttributes.IndoorOutdoor, filterable: true },
+            FullorParttime : { stringValues: jobObj.customAttributes.FullorParttime, filterable: true },
+            jobCompanyName : { stringValues: jobObj.customAttributes.jobCompanyName, filterable: true },
+            jobBand : { longValues: jobObj.customAttributes.jobBand, filterable: true },
+            jobRank : { longValues: jobObj.customAttributes.jobRank, filterable: true }
+        };
+        if(jobObj.customAttributes.WTdaytime)
+            customAttributes.WTdaytime = { stringValues: jobObj.customAttributes.WTdaytime, filterable: true };
+        if(jobObj.customAttributes.WTevening)
+            customAttributes.WTevening = { stringValues: jobObj.customAttributes.WTevening, filterable: true };
+        if(jobObj.customAttributes.WTweekend)
+            customAttributes.WTweekend = { stringValues: jobObj.customAttributes.WTweekend, filterable: true };
+        if(jobObj.customAttributes.jobSector)
+            customAttributes.jobSector = { stringValues: jobObj.customAttributes.jobSector, filterable: true };
+        if(jobObj.customAttributes.jobType)
+            customAttributes.jobType= { stringValues: jobObj.customAttributes.jobType, filterable: true };
+        job.customAttributes = customAttributes;
         if (jobName)
             job.name = jobName;
         return job;
