@@ -3,7 +3,7 @@ const constants = require('../config/constants');
 
 const generateJob = (jobObj, companyName, jobName) => {
     try {
-        const job = {
+        const job = {            
             requisitionId: jobObj.requisitionId.toString(),
             addresses: jobObj.address,
             companyName: companyName,
@@ -40,6 +40,11 @@ const generateJob = (jobObj, companyName, jobName) => {
             customAttributes.jobSector = { stringValues: jobObj.customAttributes.jobSector, filterable: true };
         if(jobObj.customAttributes.jobType)
             customAttributes.jobType= { stringValues: jobObj.customAttributes.jobType, filterable: true };
+        if(jobObj.customAttributes.internType)
+            customAttributes.internType= { stringValues: jobObj.customAttributes.internType, filterable: true };
+        if(jobObj.customAttributes.deadlineDate)
+            customAttributes.deadlineDate= { stringValues: jobObj.customAttributes.deadlineDate, filterable: true };
+
         job.customAttributes = customAttributes;
         if (jobName)
             job.name = jobName;

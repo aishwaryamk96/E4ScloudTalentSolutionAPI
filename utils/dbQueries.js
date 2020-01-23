@@ -68,7 +68,7 @@ const updateCompany = (employerId, googleCompany, status) => {
         console.log(employerId + 'employee status updated');
     }).catch(err => {
         console.error(err);
-        console.error('error while deleting row from companies');
+        console.error('error while updating companies');
     });
 };
 const getJob = (jobId) => {
@@ -108,7 +108,7 @@ const updateJob = (jobId, googleJob, status) => {
         console.log(jobId + 'job status updated');
     }).catch(err => {
         console.error(err);
-        console.error('error while deleting row from jobs');
+        console.error('error while updating the job');
     });
 };
 module.exports = {
