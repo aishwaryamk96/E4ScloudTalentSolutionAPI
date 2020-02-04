@@ -5,18 +5,19 @@ require('moment-timezone');
 moment.tz.setDefault('UTC');
 
 const getCurrentTime = () => moment().format('YYYY-MM-DD HH:mm:ss');
-const updateQueueStatus = (queueId, status) => {
-    data.dbCon.query('UPDATE queue SET status = :status WHERE queueId = :queueId', {
+const updateQueueStatus = (queueId, status,log ="error Message") => {
+    data.dbCon.query('UPDATE queue SET status = :status, log = :log WHERE queueId = :queueId', {
         replacements: {
             status: status,
+            log: log,
             queueId: queueId
         },
-        type: Sequelize.QueryTypes.DELETE
+        type: Sequelize.QueryTypes.UPDATE
     }).then(data => {
         console.log(queueId + 'execution completed');
     }).catch(err => {
         console.error(err);
-        console.error('error while deleting row from queue');
+        console.error('error while updating the row in queue');
     });
 };
 const removeQueue = (queueId) => {

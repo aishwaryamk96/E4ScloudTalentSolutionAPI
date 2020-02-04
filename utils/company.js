@@ -62,7 +62,8 @@ const createCompany = (jobServiceClient, companyData, employerId, queueId) => {
             dbQueries.createCompany(employerId, companyCreated.data.name);
             resolve(companyCreated);
         }).catch((error) => {
-            dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+            var errorMessage = error.errors[0].message;
+            dbQueries.updateQueueStatus(queueId, constants.ISSUE,errorMessage);
             reject(error);
         });
     });
@@ -90,7 +91,8 @@ const updateCompany = (jobServiceClient, companyData, employerId, queueId) => {
                 dbQueries.updateCompany(employerId, companyUpdated.data.name, constants.ACTIVE);
                 resolve(companyUpdated);
             }).catch((error) => {
-                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                var errorMessage = error.errors[0].message;
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE,errorMessage);
                 reject(error);
             });
         });
@@ -111,7 +113,8 @@ const deleteCompany = (jobServiceClient, employerId, queueId) => {
                 dbQueries.updateCompany(employerId, '', constants.INACTIVE);
                 resolve("company deleted");
             }).catch((error) => {
-                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                var errorMessage = error.errors[0].message;
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE,errorMessage);
                 reject(error);
             });
         });

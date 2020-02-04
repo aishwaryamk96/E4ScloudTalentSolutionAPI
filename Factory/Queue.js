@@ -13,7 +13,8 @@ module.exports = function(dbCon, Sequelize) {
         payload: Sequelize.TEXT,
         actionId: Sequelize.INTEGER,
         actionType: Sequelize.STRING(100),
-        status: Sequelize.BOOLEAN
+        status: Sequelize.BOOLEAN,
+        log: Sequelize.TEXT
     }, {
         freezeTableName: true
     });

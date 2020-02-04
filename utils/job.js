@@ -7,7 +7,7 @@ const generateJob = (jobObj, companyName, jobName) => {
             requisitionId: jobObj.requisitionId.toString(),
             addresses: jobObj.address,
             companyName: companyName,
-            description: jobObj.description,
+            description: jobObj.description?jobObj.description:jobObj.title,
             title: jobObj.title,
             applicationInfo: {
                 emails: jobObj.email
@@ -58,7 +58,8 @@ const createJob = (jobServiceClient, jobData, jobId, queueId) => {
     return new Promise((resolve, reject) => {
         const jobObj = JSON.parse(jobData);
         dbQueries.getCompany(jobObj.employerId).then(company => {
-            const companyName = company.googleCompanyId;
+            const companyName = comp
+            any.googleCompanyId;
             const jobToBeCreated = generateJob(jobObj, companyName);
             const request = {
                 parent: `projects/${process.env.googleProjectName}`,
@@ -71,7 +72,9 @@ const createJob = (jobServiceClient, jobData, jobId, queueId) => {
                 dbQueries.createJob(jobId, jobCreated.data.name, constants.ACTIVE);
                 resolve(jobCreated);
             }).catch((error) => {
-                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+               // console.log(error);
+                var errorMessage = error.errors[0].message;
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE,errorMessage);
                 reject(error);
             });
         }).catch((error) => {
@@ -103,7 +106,8 @@ const updateJob = (jobServiceClient, jobData, jobId, queueId) => {
                     dbQueries.updateJob(jobId, jobUpdated.data.name, constants.ACTIVE);
                     resolve(jobUpdated);
                 }).catch((error) => {
-                    dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                    var errorMessage = error.errors[0].message;
+                    dbQueries.updateQueueStatus(queueId, constants.ISSUE,errorMessage); 
                     reject(error);
                 });
             });
@@ -124,7 +128,8 @@ const deleteJob = (jobServiceClient, jobId, queueId) => {
                 dbQueries.updateJob(jobId, '', constants.INACTIVE);
                 resolve("job deleted");
             }).catch((error) => {
-                dbQueries.updateQueueStatus(queueId, constants.ISSUE);
+                var errorMessage = error.errors[0].message;
+                dbQueries.updateQueueStatus(queueId, constants.ISSUE,errorMessage);                
                 reject(error);
             });
         });
